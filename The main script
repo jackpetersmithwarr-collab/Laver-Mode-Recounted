@@ -1,69 +1,86 @@
 game.SoundService.AmbientReverb = Enum.ReverbType.Cave
 
 task.spawn(function()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Workspace = game:GetService("Workspace")
+    local Players = game:GetService("Players")
 
-	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local Workspace = game:GetService("Workspace")
-	local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
 
-	local LocalPlayer = Players.LocalPlayer
+    local in6 = {
+        { id = "107672851293252", title = 'This painting is titled "Oatei"' },
+        { id = "130821154664371", title = 'This painting is titled "chaos chaotic"' },
+        { id = "82433592774204", title = 'This painting is titled "The seer"' },
+        { id = "93549716351785", title = 'This painting is titled "Do you think corrode can’t see you"' },
+        { id = "71184374353660", title = 'This painting is titled "Mischievous Activities"' },
+        { id = "82254325269277", title = 'This painting is titled "In honour of Moriarty"' }
+    }
 
-	local in4 = {
-		{ id = "107672851293252", title = 'This painting is titled "Oatei"' },
-		{ id = "130821154664371", title = 'This painting is titled "chaos chaotic"' },
-		{ id = "82433592774204", title = 'This painting is titled "The seer"' },
-		{ id = "93549716351785", title = 'This painting is titled "Do you think corrode can’t see you"' }
-	}
+    local function Showbi(text)
+        local playerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
+        if not playerGui then return end
+        
+        local mainUI = playerGui:WaitForChild("MainUI", 5)
+        local initiator = mainUI and mainUI:WaitForChild("Initiator", 5)
+        local mainGameModule = initiator and initiator:WaitForChild("Main_Game", 5)
+        
+        if mainGameModule then
+            local success, gameModule = pcall(require, mainGameModule)
+            if success and gameModule and gameModule.caption then
+                gameModule.caption(text, true)
+            end
+        end
+    end
 
-	local function Showbi(text)
-		local mainGameModule = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainUI"):WaitForChild("Initiator"):WaitForChild("Main_Game")
-		require(mainGameModule).caption(text, true)
-	end
+    local function down(obj)
+        if not (obj:IsA("Model") and string.find(obj.Name:lower(), "painting")) then return end
+        if obj:GetAttribute("COnCAC") then return end
+        obj:SetAttribute("COnCAC", true)
 
-	local function down(obj)
-		if not (obj:IsA("Model") and string.find(obj.Name:lower(), "painting")) then return end
+        task.spawn(function()
+            local randomData = in6[math.random(1, #in6)]
+            local textureId = "rbxassetid://" .. randomData.id
+            local altTextureId = "http://www.roblox.com/asset/?id=" .. randomData.id
 
-		if obj:GetAttribute("COnCAC") then return end
-		obj:SetAttribute("COnCAC", true)
+            for _, child in ipairs(obj:GetDescendants()) do
+                if child:IsA("Decal") or child:IsA("Texture") then
+                    child.Texture = textureId
+                    if child.Texture ~= textureId then
+                        child.Texture = altTextureId
+                    end
+                elseif child:IsA("ImageLabel") or child:IsA("ImageButton") then
+                    child.Image = textureId
+                    if child.Image ~= textureId then
+                        child.Image = altTextureId
+                    end
+                end
+            end
 
-		task.spawn(function()
-			local canvas = obj:WaitForChild("Canvas", 5)
-			if not canvas then return end
+            local aihoi = obj:FindFirstChild("InteractPrompt", true) or obj:WaitForChild("InteractPrompt", 3)
+            if aihoi then
+                local FakeVPn = aihoi:Clone()
+                FakeVPn.Name = "FakeVpn"
+                FakeVPn.Parent = aihoi.Parent
 
-			local surfaceGui = canvas:WaitForChild("SurfaceGui", 5) or canvas:FindFirstChildWhichIsA("SurfaceGui")
-			if not surfaceGui then return end
+                aihoi:Destroy()
 
-			local imageLabel = surfaceGui:WaitForChild("ImageLabel", 5) or surfaceGui:FindFirstChildWhichIsA("ImageLabel")
-			if not imageLabel then return end
+                FakeVPn.Triggered:Connect(function()
+                    Showbi(randomData.title)
+                end)
+            end
+        end)
+    end
 
-			local randomData = in4[math.random(1, #in4)]
-			imageLabel.Image = "rbxassetid://" .. randomData.id
+    local currentRooms = Workspace:WaitForChild("CurrentRooms", 10)
+    if currentRooms then
+        for _, descendant in ipairs(currentRooms:GetDescendants()) do
+            down(descendant)
+        end
 
-			local aihoi = obj:FindFirstChild("InteractPrompt", true) or obj:WaitForChild("InteractPrompt", 3)
-			if aihoi then
-				local FakeVPn = aihoi:Clone()
-				FakeVPn.Name = "FakeVpn"
-				FakeVPn.Parent = aihoi.Parent
-
-				aihoi:Destroy()
-
-				FakeVPn.Triggered:Connect(function()
-					Showbi(randomData.title)
-				end)
-			end
-		end)
-	end
-
-	local currentRooms = Workspace:WaitForChild("CurrentRooms")
-
-	currentRooms.DescendantAdded:Connect(function(descendant)
-		down(descendant)
-	end)
-
-	for _, descendant in ipairs(currentRooms:GetDescendants()) do
-		down(descendant)
-	end
-
+        currentRooms.DescendantAdded:Connect(function(descendant)
+            down(descendant)
+        end)
+    end
 end)
 
 warn("Loading")
