@@ -34,7 +34,7 @@ for i = 12 , 99 , r:NextInteger(8,5,seed) do
 	table.insert(classiosp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
-for i = 6 , 90 , r:NextInteger(8,6,seed) do
+for i = 6 , 90 , r:NextInteger(13,16,seed) do
 	table.insert(corrodesp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
@@ -75,8 +75,8 @@ lastroom.changed:connect(function()
 	end
 	if table.find(corrodesp, lastroom.Value) then
 		task.spawn(function()
-			task.wait(r3:NextInteger(6,6,lastroom.Value))
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/Corrodelegacy"))()
+			task.wait(r3:NextInteger(12,20,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Laver-Mode-Recounted/main/Corrode"))()
 		end)
 	end
 	if table.find(moriartysp, lastroom.Value) then
