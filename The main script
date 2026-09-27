@@ -1,5 +1,71 @@
 game.SoundService.AmbientReverb = Enum.ReverbType.Cave
 
+task.spawn(function()
+
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local Workspace = game:GetService("Workspace")
+	local Players = game:GetService("Players")
+
+	local LocalPlayer = Players.LocalPlayer
+
+	local in4 = {
+		{ id = "107672851293252", title = 'This painting is titled "Oatei"' },
+		{ id = "130821154664371", title = 'This painting is titled "chaos chaotic"' },
+		{ id = "82433592774204", title = 'This painting is titled "The seer"' },
+		{ id = "93549716351785", title = 'This painting is titled "Do you think corrode can’t see you"' }
+	}
+
+	local function Showbi(text)
+		local mainGameModule = LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("MainUI"):WaitForChild("Initiator"):WaitForChild("Main_Game")
+		require(mainGameModule).caption(text, true)
+	end
+
+	local function down(obj)
+		if not (obj:IsA("Model") and string.find(obj.Name:lower(), "painting")) then return end
+
+		if obj:GetAttribute("COnCAC") then return end
+		obj:SetAttribute("COnCAC", true)
+
+		task.spawn(function()
+			local canvas = obj:WaitForChild("Canvas", 5)
+			if not canvas then return end
+
+			local surfaceGui = canvas:WaitForChild("SurfaceGui", 5) or canvas:FindFirstChildWhichIsA("SurfaceGui")
+			if not surfaceGui then return end
+
+			local imageLabel = surfaceGui:WaitForChild("ImageLabel", 5) or surfaceGui:FindFirstChildWhichIsA("ImageLabel")
+			if not imageLabel then return end
+
+			local randomData = in4[math.random(1, #in4)]
+			imageLabel.Image = "rbxassetid://" .. randomData.id
+
+			local aihoi = obj:FindFirstChild("InteractPrompt", true) or obj:WaitForChild("InteractPrompt", 3)
+			if aihoi then
+				local FakeVPn = aihoi:Clone()
+				FakeVPn.Name = "FakeVpn"
+				FakeVPn.Parent = aihoi.Parent
+
+				aihoi:Destroy()
+
+				FakeVPn.Triggered:Connect(function()
+					Showbi(randomData.title)
+				end)
+			end
+		end)
+	end
+
+	local currentRooms = Workspace:WaitForChild("CurrentRooms")
+
+	currentRooms.DescendantAdded:Connect(function(descendant)
+		down(descendant)
+	end)
+
+	for _, descendant in ipairs(currentRooms:GetDescendants()) do
+		down(descendant)
+	end
+
+end)
+
 warn("Loading")
 _G.ver = 1.0
 
