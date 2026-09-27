@@ -42,7 +42,7 @@ for i = 17 , 96 , r:NextInteger(4,5,seed) do
 	table.insert(moriartysp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
-for i = 20 , 99 , r:NextInteger(8,5,seed) do
+for i = 30 , 99 , r:NextInteger(18,25,seed) do
 	table.insert(deathsp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
@@ -87,8 +87,8 @@ lastroom.changed:connect(function()
 	end
 	if table.find(deathsp, lastroom.Value) then
 		task.spawn(function()
-			task.wait(r3:NextInteger(2,20,lastroom.Value))
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/Deathlegacy"))()
+			task.wait(r3:NextInteger(18,25,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Laver-Mode-Recounted/main/Death"))()
 		end)
 	end
 end)
