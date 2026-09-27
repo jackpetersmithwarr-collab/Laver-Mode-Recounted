@@ -8,7 +8,7 @@ task.spawn(function()
     local LocalPlayer = Players.LocalPlayer
 
     local in6 = {
-        { id = "107672851293252", title = 'This painting is titled "Oatei"' },
+        { id = "133139985133433", title = 'This painting is titled "is that a death"' },
         { id = "130821154664371", title = 'This painting is titled "chaos chaotic"' },
         { id = "82433592774204", title = 'This painting is titled "The seer"' },
         { id = "93549716351785", title = 'This painting is titled "Do you think corrode can’t see you"' },
