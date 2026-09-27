@@ -118,6 +118,90 @@ end)
 entity:SetCallback("OnDamagePlayer", function(newHealth)
 	if newHealth == 0 then
 		print("Entity has killed the player")
+
+-- ====== JUMPSCARE SYSTEM ======
+		local Players = game:GetService("Players")
+		local TweenService = game:GetService("TweenService")
+		local SoundService = game:GetService("SoundService")
+		local ContentProvider = game:GetService("ContentProvider")
+		local localPlayer = Players.LocalPlayer
+		
+		if localPlayer and localPlayer:FindFirstChild("PlayerGui") then
+			local jumpAudio = Instance.new("Sound")
+			jumpAudio.SoundId = "rbxassetid://0"
+			jumpAudio.Volume = 2.5 
+			jumpAudio.Parent = SoundService 
+			
+			local secondaryAudio = Instance.new("Sound")
+			secondaryAudio.SoundId = "rbxassetid://116282238939992"
+			secondaryAudio.Volume = 2.0
+			secondaryAudio.Parent = SoundService
+			
+			pcall(function()
+				ContentProvider:PreloadAsync({jumpAudio, secondaryAudio})
+			end)
+			
+			local jumpGui = Instance.new("ScreenGui")
+			jumpGui.Name = "JumpscareGui"
+			jumpGui.IgnoreGuiInset = true 
+			jumpGui.ResetOnSpawn = false
+			jumpGui.Parent = localPlayer.PlayerGui
+			
+			local background = Instance.new("Frame")
+			background.Size = UDim2.new(1, 0, 1, 0)
+			background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+			background.BorderSizePixel = 0
+			background.Parent = jumpGui
+			
+			local imageLabel = Instance.new("ImageLabel")
+			imageLabel.Image = "rbxassetid://103493009651088"
+			imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+			imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+			imageLabel.Size = UDim2.new(0.05, 0, 0.05, 0) 
+			imageLabel.BackgroundTransparency = 1
+			imageLabel.BorderSizePixel = 0
+			imageLabel.Parent = jumpGui
+			
+			jumpAudio:Play()
+			
+			task.spawn(function()
+				for i = 1, 19 do
+					background.BackgroundColor3 = Color3.fromRGB(255, 90, 200) 
+					task.wait(0.06)
+					background.BackgroundColor3 = Color3.fromRGB(70, 0, 70) 
+					task.wait(0.06)
+				end
+			end)
+			
+			local viewportSize = workspace.CurrentCamera.ViewportSize
+			local largestDimension = math.max(viewportSize.X, viewportSize.Y)
+			
+			local zoomInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+			local zoomTween = TweenService:Create(imageLabel, zoomInfo, {
+				Size = UDim2.new(0, largestDimension * 1.5, 0, largestDimension * 1.5)
+			})
+			zoomTween:Play()
+			
+			task.wait(1.2)
+			
+			local fadeInfo = TweenInfo.new(0.9, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+			local fadeBackground = TweenService:Create(background, fadeInfo, {BackgroundTransparency = 1})
+			local fadeImage = TweenService:Create(imageLabel, fadeInfo, {ImageTransparency = 1})
+			
+			fadeBackground:Play()
+			fadeImage:Play()
+			
+			secondaryAudio:Play()
+			
+			fadeImage.Completed:Connect(function()
+				jumpGui:Destroy()
+				task.spawn(function()
+					task.wait(5) 
+					if jumpAudio then jumpAudio:Destroy() end
+					if secondaryAudio then secondaryAudio:Destroy() end
+				end)
+			end)
+		end
 	else
 		print("Entity has damaged the player")
 	end
