@@ -1,1 +1,94 @@
+game.SoundService.AmbientReverb = Enum.ReverbType.Cave
 
+warn("Loading")
+_G.ver = 1.0
+
+
+local seed = game.ReplicatedStorage.GameData.GameSeed.Value
+local r = Random.new(seed)
+local r2 = Random.new(seed+1)
+local r3 = Random.new(seed+2)
+local lastroom = game.ReplicatedStorage.GameData.LatestRoom
+local tweenservice = game:GetService("TweenService")
+
+local captions = {"Good Luck", "I forgot my corrode", "sigma boii", "classio is not a man", "watch out for impending chaotic"}
+_G.chaotic = false
+_G.classio = false
+_G.corrode = false
+_G.moriarty = false
+_G.death = false
+
+_G.insp = true
+
+local chaoticsp = {}
+local classiosp = {}
+local corrodesp = {}
+local moriartysp = {}
+local deathsp = {}
+
+for i = 15 , 95 , r:NextInteger(6,8,seed) do
+	table.insert(chaoticsp,r2:NextInteger(i - 4,i + 7,seed + i))
+end
+
+for i = 12 , 99 , r:NextInteger(8,5,seed) do
+	table.insert(classiosp,r2:NextInteger(i - 4,i + 7,seed + i))
+end
+
+for i = 6 , 90 , r:NextInteger(8,6,seed) do
+	table.insert(corrodesp,r2:NextInteger(i - 4,i + 7,seed + i))
+end
+
+for i = 17 , 96 , r:NextInteger(4,5,seed) do
+	table.insert(moriartysp,r2:NextInteger(i - 4,i + 7,seed + i))
+end
+
+for i = 20 , 99 , r:NextInteger(8,5,seed) do
+	table.insert(deathsp,r2:NextInteger(i - 4,i + 7,seed + i))
+end
+
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Loaded",true)
+warn("Loaded")
+
+
+lastroom.changed:wait()
+
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Laver Mode Recounted ".. _G.ver .." active",true)
+task.wait(3)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Made by Silly cat cat (now known as Greendepth/rammerv1) and localplayer. Recounted by greendepth/rammerv1",true)
+task.wait(2)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("Goodluck",true)
+task.wait(1)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption(captions[r3:NextInteger(0,#captions,seed)],true)
+
+lastroom.changed:connect(function()
+	if table.find(chaoticsp, lastroom.Value) then
+		task.spawn(function()
+			task.wait(r3:NextInteger(5,15,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/ChaoticLegacy"))()
+		end)
+	end
+	if table.find(classiosp, lastroom.Value) then
+		task.spawn(function()
+			task.wait(r3:NextInteger(2,12,lastroom.Value))
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/ClassioReboundierLegacy"))()
+		end)
+	end
+	if table.find(corrodesp, lastroom.Value) then
+		task.spawn(function()
+			task.wait(r3:NextInteger(6,6,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/Corrodelegacy"))()
+		end)
+	end
+	if table.find(moriartysp, lastroom.Value) then
+		task.spawn(function()
+			task.wait(r3:NextInteger(1,17,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/MoriArtyLegacy"))()
+		end) 
+	end
+	if table.find(deathsp, lastroom.Value) then
+		task.spawn(function()
+			task.wait(r3:NextInteger(2,20,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/Deathlegacy"))()
+		end)
+	end
+end)
