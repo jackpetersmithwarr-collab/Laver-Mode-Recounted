@@ -1,0 +1,226 @@
+---====== Load spawner ======---
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "Chaotic",
+		Asset = "https://raw.githubusercontent.com/J63633S/entity-stop-looking-at-me-profile/main/ChaoticRecounted.rbxm",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 7
+		},
+		Shatter = false,
+		Repair = false
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 50,
+		Values = {100, 30, 0.1, 0.1} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 195,
+		Delay = 6,
+		Reversed = false
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush", -- "Blitz"
+		Min = 2,
+		Max = 3,
+		Delay = 0
+	},
+	Damage = {
+		Enabled = true,
+		Range = 50,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"You died to chaotic...", "To survive him, hide and wait for him to despawn.", "He can rebound up to 2 or 3 times.", "Goodluck next time."},
+		Cause = "Chaotic"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local originalAmbient = Lighting.Ambient
+local originalOutdoorAmbient = Lighting.OutdoorAmbient
+local originalColorShiftTop = Lighting.ColorShift_Top
+local originalColorShiftBottom = Lighting.ColorShift_Bottom
+
+local originalPartColors = {}
+local keepTintedInstances = {}
+
+local BRIGHT_PINK_RED = Color3.fromRGB(255, 30, 120) 
+local DARK_PINK_RED = Color3.fromRGB(140, 10, 50) 
+
+local TWEEN_TIME = 1.5 
+local FADE_OUT_TIME = 4.0
+local tweenInfoIn = TweenInfo.new(TWEEN_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+local tweenInfoOutLinear = TweenInfo.new(FADE_OUT_TIME, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+
+player.CharacterAdded:Connect(function(newCharacter)
+	character = newCharacter
+end)
+
+local function isPlayerLight(instance)
+	if instance:IsDescendantOf(character) then
+		return true
+	end
+	local lightItem = instance:FindFirstAncestorOfClass("Tool")
+	if lightItem and lightItem:IsDescendantOf(character) then
+		return true
+	end
+	return false
+end
+
+local function tintObject(instance)
+	if instance:IsA("BasePart") or instance:IsA("Light") then
+		if not originalPartColors[instance] then
+			originalPartColors[instance] = instance.Color
+		end
+		TweenService:Create(instance, tweenInfoIn, {Color = BRIGHT_PINK_RED}):Play()
+	end
+end
+
+local function activateLuauShift()
+	local lightingGoal = {
+		Ambient = BRIGHT_PINK_RED,
+		OutdoorAmbient = DARK_PINK_RED,
+		ColorShift_Top = BRIGHT_PINK_RED,
+		ColorShift_Bottom = DARK_PINK_RED
+	}
+	
+	TweenService:Create(Lighting, tweenInfoIn, lightingGoal):Play()
+	
+	for _, descendant in ipairs(workspace:GetDescendants()) do
+		tintObject(descendant)
+	end
+	
+	_G.LuauDescendantConnection = workspace.DescendantAdded:Connect(function(newDescendant)
+		task.wait()
+		if not isPlayerLight(newDescendant) then
+			keepTintedInstances[newDescendant] = true
+		end
+		tintObject(newDescendant)
+	end)
+end
+
+local function resetLuauShift()
+	if _G.LuauDescendantConnection then
+		_G.LuauDescendantConnection:Disconnect()
+		_G.LuauDescendantConnection = nil
+	end
+
+	local lightingGoal = {
+		Ambient = originalAmbient,
+		OutdoorAmbient = originalOutdoorAmbient,
+		ColorShift_Top = originalColorShiftTop,
+		ColorShift_Bottom = originalColorShiftBottom
+	}
+	
+	TweenService:Create(Lighting, tweenInfoOutLinear, lightingGoal):Play()
+	
+	for instance, originalColor in pairs(originalPartColors) do
+		if instance and instance.Parent then
+			if isPlayerLight(instance) or not keepTintedInstances[instance] then
+				TweenService:Create(instance, tweenInfoOutLinear, {Color = originalColor}):Play()
+			end
+		end
+	end
+	
+	table.clear(originalPartColors)
+	table.clear(keepTintedInstances)
+end
+
+task.wait(3)
+activateLuauShift()
+
+task.wait(10)
+resetLuauShift()
+
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+end)
+
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+    if firstTime == true then
+        print("Entity has entered room: ".. room.Name.. " for the first time")
+    else
+        print("Entity has entered room: ".. room.Name.. " again")
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run()
