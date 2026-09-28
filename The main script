@@ -113,7 +113,7 @@ for i = 25 , 95 , r:NextInteger(6,8,seed) do
 	table.insert(chaoticsp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
-for i = 12 , 99 , r:NextInteger(8,5,seed) do
+for i = 22 , 99 , r:NextInteger(8,5,seed) do
 	table.insert(classiosp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
@@ -152,8 +152,8 @@ lastroom.changed:connect(function()
 	end
 	if table.find(classiosp, lastroom.Value) then
 		task.spawn(function()
-			task.wait(r3:NextInteger(9,17,lastroom.Value))
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/ClassioReboundierLegacy"))()
+			task.wait(r3:NextInteger(19,17,lastroom.Value))
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Laver-Mode-Recounted/main/ClassioReboundier"))()
 		end)
 	end
 	if table.find(corrodesp, lastroom.Value) then
