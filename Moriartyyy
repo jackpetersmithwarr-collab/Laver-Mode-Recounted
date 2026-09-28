@@ -1,0 +1,317 @@
+---====== Load spawner ======---
+
+local spawner = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Entity%20Spawner/V2/Source.lua"))()
+
+---====== Create entity ======---
+
+local entity = spawner.Create({
+	Entity = {
+		Name = "Moriarty",
+		Asset = "https://raw.githubusercontent.com/J63633S/Awesome-ENTITIES-bec-i-have-an-pc/refs/heads/main/moriarty.rbxm",
+		HeightOffset = 0
+	},
+	Lights = {
+		Flicker = {
+			Enabled = true,
+			Duration = 10
+		},
+		Shatter = true,
+		Repair = true
+	},
+	Earthquake = {
+		Enabled = false
+	},
+	CameraShake = {
+		Enabled = true,
+		Range = 200,
+		Values = {40, 20, 0.01, 0.01} -- Magnitude, Roughness, FadeIn, FadeOut
+	},
+	Movement = {
+		Speed = 500,
+		Delay = 7,
+		Reversed = true
+	},
+	Rebounding = {
+		Enabled = true,
+		Type = "Ambush", -- "Blitz"
+		Min = 3,
+		Max = 6,
+		Delay = 1
+	},
+	Damage = {
+		Enabled = true,
+		Range = 30,
+		Amount = 125
+	},
+	Crucifixion = {
+		Enabled = true,
+		Range = 40,
+		Resist = false,
+		Break = true
+	},
+	Death = {
+		Type = "Guiding", -- "Curious"
+		Hints = {"You died to Moriarty..", "It is a very fast entity. It rebounds a lot and relying on corners is your only option. ", "Your best bet is finding a way to bypass it's hitbox.", "Short rooms are the only thing that makes it harder."},
+		Cause = "Moriarty"
+	}
+})
+
+---====== Debug entity ======---
+
+entity:SetCallback("OnSpawned", function()
+    print("Entity has spawned")
+task.wait(3)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("A heavy presence comes",true)
+task.wait(1)
+require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption("You are not alone.",true)
+
+end)
+
+entity:SetCallback("OnStartMoving", function()
+    print("Entity has started moving")
+
+local players = game:GetService("Players")
+local tweenservice = game:GetService("TweenService")
+local lighting = game:GetService("Lighting")
+local runservice = game:GetService("RunService")
+
+local player = players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local normal_fov = 70             
+local target_fov = 40             
+
+local fade_in_duration = 8        
+local hold_duration = 20          
+local fade_out_duration = 30      
+
+local fov_hold_before_fade = 15
+local fov_fade_out_duration = 5
+
+local max_shake_intensity = 0.3   
+
+local original_fog_color = lighting.FogColor
+local original_fog_start = lighting.FogStart
+local original_fog_end = lighting.FogEnd
+
+local shakeintensityvalue = Instance.new("NumberValue")
+shakeintensityvalue.Name = "ShakeIntensity"
+shakeintensityvalue.Value = 0
+shakeintensityvalue.Parent = script
+
+local currentfovvalue = Instance.new("NumberValue")
+currentfovvalue.Name = "CurrentFOV"
+currentfovvalue.Value = normal_fov
+currentfovvalue.Parent = script
+
+local colorcorrection = Instance.new("ColorCorrectionEffect")
+colorcorrection.Name = "WhiteoutScreenEffect"
+colorcorrection.Saturation = 0
+colorcorrection.Brightness = 0
+colorcorrection.Contrast = 0
+colorcorrection.Parent = lighting
+
+local vignetteeffect = Instance.new("ColorCorrectionEffect")
+vignetteeffect.Name = "VignetteEffect"
+vignetteeffect.TintColor = Color3.fromRGB(255, 255, 255)
+vignetteeffect.Contrast = 0 
+vignetteeffect.Parent = lighting
+
+local shakeconnection
+local timeelapsed = 0
+
+shakeconnection = runservice.RenderStepped:Connect(function(delta_time)
+	camera.FieldOfView = currentfovvalue.Value
+
+	local currentintensity = shakeintensityvalue.Value
+	if currentintensity > 0 then
+		timeelapsed = timeelapsed + delta_time * 45 
+		
+		local shakex = math.sin(timeelapsed) * currentintensity
+		local shakey = math.cos(timeelapsed * 1.5) * currentintensity
+		local shakez = math.sin(timeelapsed * 0.8) * currentintensity
+		
+		camera.CFrame = camera.CFrame * CFrame.Angles(
+			math.rad(shakex), 
+			math.rad(shakey), 
+			math.rad(shakez)
+		)
+	end
+end)
+
+local fadeininfo = TweenInfo.new(fade_in_duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+local fadeincolor = tweenservice:Create(colorcorrection, fadeininfo, {
+	Saturation = -1,
+	Brightness = 1,
+	Contrast = 2
+})
+local fadeinvignette = tweenservice:Create(vignetteeffect, fadeininfo, {
+	Contrast = 0.6 
+})
+local fadeinshake = tweenservice:Create(shakeintensityvalue, fadeininfo, {
+	Value = max_shake_intensity
+})
+local fadeincamera = tweenservice:Create(currentfovvalue, fadeininfo, {
+	Value = target_fov
+})
+
+lighting.FogColor = Color3.fromRGB(0, 0, 0)
+local randomfogmax = math.random(30, 50)
+local fadeinfog = tweenservice:Create(lighting, fadeininfo, {
+	FogStart = 0,
+	FogEnd = randomfogmax
+})
+
+fadeincolor:Play()
+fadeinvignette:Play()
+fadeinshake:Play()
+fadeincamera:Play()
+fadeinfog:Play()
+
+fadeincolor.Completed:Connect(function()
+	task.delay(fov_hold_before_fade, function()
+		local fovfadeinfo = TweenInfo.new(fov_fade_out_duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+		
+		local fadeoutcamera = tweenservice:Create(currentfovvalue, fovfadeinfo, {
+			Value = normal_fov
+		})
+		local fadeoutfog = tweenservice:Create(lighting, fovfadeinfo, {
+			FogStart = original_fog_start,
+			FogEnd = original_fog_end
+		})
+		
+		fadeoutcamera:Play()
+		fadeoutfog:Play()
+		
+		fadeoutfog.Completed:Connect(function()
+			lighting.FogColor = original_fog_color
+		end)
+	end)
+
+	task.wait(hold_duration)
+	
+	local fadeoutinfo = TweenInfo.new(fade_out_duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+	
+	local fadeoutcolor = tweenservice:Create(colorcorrection, fadeoutinfo, {
+		Saturation = 0,
+		Brightness = 0,
+		Contrast = 0
+	})
+	local fadeoutvignette = tweenservice:Create(vignetteeffect, fadeoutinfo, {
+		Contrast = 0
+	})
+	local fadeoutshake = tweenservice:Create(shakeintensityvalue, fadeoutinfo, {
+		Value = 0 
+	})
+	
+	fadeoutcolor:Play()
+	fadeoutvignette:Play()
+	fadeoutshake:Play()
+	
+	fadeoutcolor.Completed:Connect(function()
+		if shakeconnection then shakeconnection:Disconnect() end
+		colorcorrection:Destroy()
+		vignetteeffect:Destroy()
+		shakeintensityvalue:Destroy()
+		currentfovvalue:Destroy()
+	end)
+end)
+
+local function applywhitefadetoroom(room_model)
+	if not room_model:IsA("Model") then return end
+	if room_model:FindFirstChild("RoomWhiteoutEffect") then return end
+	
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "RoomWhiteoutEffect"
+	highlight.FillColor = Color3.fromRGB(255, 255, 255)
+	highlight.FillTransparency = 1 
+	highlight.OutlineTransparency = 1
+	highlight.Adornee = room_model
+	highlight.Parent = room_model
+
+	local fadeinhighlightinfo = TweenInfo.new(fade_in_duration, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+	local roomfadeintween = tweenservice:Create(highlight, fadeinhighlightinfo, {FillTransparency = 0})
+	roomfadeintween:Play()
+
+	task.delay(fade_in_duration + hold_duration, function()
+		if not highlight or not highlight.Parent then return end
+		
+		local roomtweeninfo = TweenInfo.new(fade_out_duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
+		local roomtween = tweenservice:Create(highlight, roomtweeninfo, {FillTransparency = 1})
+		roomtween:Play()
+
+		roomtween.Completed:Connect(function()
+			highlight:Destroy()
+		end)
+	end)
+end
+
+workspace.ChildAdded:Connect(function(child)
+	if child:IsA("Model") and not players:GetPlayerFromCharacter(child) then
+		applywhitefadetoroom(child)
+	end
+end)
+
+for _, child in ipairs(workspace:GetChildren()) do
+	if child:IsA("Model") and not players:GetPlayerFromCharacter(child) then
+		applywhitefadetoroom(child)
+	end
+end
+
+end)
+
+entity:SetCallback("OnEnterRoom", function(room, firstTime)
+    if firstTime == true then
+        print("Entity has entered room: ".. room.Name.. " for the first time")
+    else
+        print("Entity has entered room: ".. room.Name.. " again")
+    end
+end)
+
+entity:SetCallback("OnLookAt", function(lineOfSight)
+	if lineOfSight == true then
+		print("Player is looking at entity")
+	else
+		print("Player view is obstructed by something")
+	end
+end)
+
+entity:SetCallback("OnRebounding", function(startOfRebound)
+    if startOfRebound == true then
+        print("Entity has started rebounding")
+	else
+        print("Entity has finished rebounding")
+	end
+end)
+
+entity:SetCallback("OnDespawning", function()
+    print("Entity is despawning")
+end)
+
+entity:SetCallback("OnDespawned", function()
+    print("Entity has despawned")
+end)
+
+entity:SetCallback("OnDamagePlayer", function(newHealth)
+	if newHealth == 0 then
+		print("Entity has killed the player")
+	else
+		print("Entity has damaged the player")
+	end
+end)
+
+--[[
+
+DEVELOPER NOTE:
+By overwriting 'CrucifixionOverwrite' the default crucifixion callback will be replaced with your custom callback.
+
+entity:SetCallback("CrucifixionOverwrite", function()
+    print("Custom crucifixion callback")
+end)
+
+]]--
+
+---====== Run entity ======---
+
+entity:Run()
