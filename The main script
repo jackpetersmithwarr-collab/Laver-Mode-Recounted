@@ -1,3 +1,20 @@
+local function getGitSoundId(GithubSoundPath: string, AssetName: string): Sound
+    local Url = GithubSoundPath
+
+    if not isfile(AssetName..".mp3") then 
+        writefile(AssetName..".mp3", game:HttpGet(Url)) 
+    end
+
+    local Sound = Instance.new("Sound")
+    Sound.SoundId = getcustomasset(AssetName..".mp3", true)
+    return Sound 
+end
+
+local CustomMusic = getGitSoundId("https://raw.githubusercontent.com/J63633S/Doors-but-entity-dump/main/Crepy_song.mp3", "creepyambience")
+CustomMusic.Parent = game.SoundService
+CustomMusic.Looped = true
+CustomMusic:Play()
+
 game.SoundService.AmbientReverb = Enum.ReverbType.Cave
 
 task.spawn(function()
