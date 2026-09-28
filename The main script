@@ -109,7 +109,7 @@ local corrodesp = {}
 local moriartysp = {}
 local deathsp = {}
 
-for i = 15 , 95 , r:NextInteger(6,8,seed) do
+for i = 25 , 95 , r:NextInteger(6,8,seed) do
 	table.insert(chaoticsp,r2:NextInteger(i - 4,i + 7,seed + i))
 end
 
@@ -146,13 +146,13 @@ require(game.Players.LocalPlayer.PlayerGui.MainUI.Initiator.Main_Game).caption(c
 lastroom.changed:connect(function()
 	if table.find(chaoticsp, lastroom.Value) then
 		task.spawn(function()
-			task.wait(r3:NextInteger(5,15,lastroom.Value))
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/ChaoticLegacy"))()
+			task.wait(r3:NextInteger(15,25,lastroom.Value))
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Laver-Mode-Recounted/main/chaoschaotic"))()
 		end)
 	end
 	if table.find(classiosp, lastroom.Value) then
 		task.spawn(function()
-			task.wait(r3:NextInteger(2,12,lastroom.Value))
+			task.wait(r3:NextInteger(9,17,lastroom.Value))
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/jackpetersmithwarr-collab/Doors-Laver-mode-Legacy/main/ClassioReboundierLegacy"))()
 		end)
 	end
